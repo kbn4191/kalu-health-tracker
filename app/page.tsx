@@ -43,8 +43,9 @@ const vitals = [
   { day: "Tue 23", date: "Jun 23", temp: 35.9, sys: 106, dia: 60, pulse: 71 },
   { day: "Wed 24", date: "Jun 24", temp: 35.8, sys: 131, dia: 74, pulse: 63 },
   { day: "Thu 25", date: "Jun 25", temp: 36.2, sys: 124, dia: 72, pulse: 68 },
-  { day: "Thu 26", date: "Jun 26", temp: 36.2, sys: 137, dia: 95, pulse: 70 },
-  { day: "Thu 27", date: "Jun 27", temp: 35.1, sys: 162, dia: 92, pulse: 73 },
+  { day: "Fri 26", date: "Jun 26", temp: 36.2, sys: 137, dia: 95, pulse: 70 },
+  { day: "Sat 27", date: "Jun 27", temp: 35.1, sys: 162, dia: 92, pulse: 73 },
+  { day: "Sun 28", date: "Jun 28", temp: 36.1, sys: 130, dia: 83, pulse: 73 },
 ];
 
 const dischargeMeds = [
