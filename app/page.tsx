@@ -24,6 +24,8 @@ import {
   Hospital,
   Scan,
   Dumbbell,
+  Clock,
+  ShieldQuestion,
 } from "lucide-react";
 import {
   LineChart,
@@ -47,12 +49,128 @@ const vitals = [
   { day: "Sat 27", date: "Jun 27", temp: 35.1, sys: 162, dia: 92, pulse: 73 },
   { day: "Sun 28", date: "Jun 28", temp: 36.1, sys: 130, dia: 83, pulse: 73 },
   { day: "Mon 29", date: "Jun 29", temp: 36.3, sys: 114, dia: 61, pulse: 73 },
-    { day: "Tue 30", date: "Jun 30", temp: 36.5, sys: 124, dia: 73, pulse: 75 },
- { day: "Wed 1", date: "Jul 1", temp: 36.2, sys: 128, dia: 66, pulse: 68 },
+  { day: "Tue 30", date: "Jun 30", temp: 36.5, sys: 124, dia: 73, pulse: 75 },
+  { day: "Wed 1", date: "Jul 1", temp: 36.2, sys: 128, dia: 66, pulse: 68 },
   { day: "Thu 2", date: "Jul 2", temp: 35.9, sys: 127, dia: 78, pulse: 67 },
   { day: "Fri 3", date: "Jul 3", temp: 36.1, sys: 134, dia: 74, pulse: 71 },
-   { day: "Wed 6", date: "Jul 6", temp: 36.1, sys: 125, dia: 72, pulse: 95 },
+  { day: "Wed 6", date: "Jul 6", temp: 36.1, sys: 125, dia: 72, pulse: 95 },
 ];
+
+// Prescription written by the neurologist at the Friday Jul 3, 2026 hospital visit.
+// status: "new" = not seen before, "continued" = was already being taken,
+// "dose-changed" = same drug, dose/frequency updated, "unclear" = needs pharmacist confirmation.
+const currentPrescription = [
+  {
+    name: "Atorvastatin 40mg",
+    generic: "Atorvastatin",
+    dose: "1 tablet",
+    frequency: "Once daily — at night",
+    duration: "Ongoing",
+    purpose:
+      "Lowers cholesterol and helps reduce the risk of another stroke",
+    status: "continued",
+  },
+  {
+    name: "Citicoline 500mg",
+    generic: "Citicoline",
+    dose: "1 tablet",
+    frequency: "Once daily",
+    duration: "Ongoing",
+    purpose: "Supports brain cell recovery after the stroke",
+    status: "continued",
+  },
+  {
+    name: "Vitamin C 500mg",
+    generic: "Ascorbic Acid",
+    dose: "1 tablet",
+    frequency: "Three times daily",
+    duration: "Ongoing",
+    purpose: "Antioxidant that supports the immune system",
+    status: "dose-changed",
+    note: "Frequency increased — was twice daily, now three times daily",
+  },
+  {
+    name: "Neurovite Forte",
+    generic: "B-Complex vitamins",
+    dose: "1 capsule",
+    frequency: "Once daily",
+    duration: "Ongoing",
+    purpose: "Nerve support / vitamin supplement",
+    status: "continued",
+  },
+  {
+    name: "Vitamin E 1000iu",
+    generic: "Tocopherol",
+    dose: "1 tablet",
+    frequency: "Once daily",
+    duration: "Ongoing",
+    purpose: "Antioxidant that supports nerve and blood vessel health",
+    status: "new",
+  },
+  {
+    name: "Dabigatran 110mg",
+    generic: "Dabigatran (Pradaxa)",
+    dose: "1 tablet",
+    frequency: "Once daily",
+    duration: "Ongoing",
+    purpose: "Prevents blood clots (anticoagulant)",
+    status: "continued",
+  },
+  {
+    name: "Co-Diovan 40/10mg",
+    generic: "Valsartan / Amlodipine",
+    dose: "1 tablet",
+    frequency: "Once daily",
+    duration: "Ongoing",
+    purpose: "Blood pressure control (combination therapy)",
+    status: "new",
+    note: "Confirm with the doctor whether this replaces Cardiotan (Telmisartan/Amlodipine) or is taken alongside it — both are BP combination drugs, so double-dosing should be avoided.",
+  },
+  {
+    name: "Cefixime 200mg",
+    generic: "Cefixime",
+    dose: "1 tablet",
+    frequency: "Twice daily (BD)",
+    duration: "5-day course",
+    startDate: "Jul 3, 2026",
+    endDate: "Jul 7, 2026",
+    purpose: "Antibiotic — treats a bacterial infection",
+    status: "new",
+    courseStatus: "ongoing",
+  },
+  {
+    name: "Azithromycin 500mg",
+    generic: "Azithromycin",
+    dose: "1 tablet",
+    frequency: "Once daily",
+    duration: "3-day course",
+    startDate: "Jul 3, 2026",
+    endDate: "Jul 5, 2026",
+    purpose: "Antibiotic — treats a bacterial/respiratory infection",
+    status: "new",
+    courseStatus: "completed",
+  },
+  {
+    name: "Grimesyts",
+    generic: "Not identified",
+    dose: "—",
+    frequency: "—",
+    duration: "—",
+    purpose:
+      "This name doesn't match a drug we can identify from the note. Please confirm the exact name and dose with the pharmacist or prescribing doctor before giving it.",
+    status: "unclear",
+  },
+];
+
+const statusStyles: Record<string, { label: string; classes: string }> = {
+  new: { label: "New", classes: "bg-blue-100 text-blue-700" },
+  continued: { label: "Continued", classes: "bg-slate-100 text-slate-600" },
+  "dose-changed": {
+    label: "Dose changed",
+    classes: "bg-amber-100 text-amber-700",
+  },
+  unclear: { label: "Needs confirmation", classes: "bg-red-100 text-red-700" },
+};
 
 const dischargeMeds = [
   {
@@ -321,12 +439,19 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-type TabSection = "vitals" | "meds" | "admission" | "imaging" | "profile";
+type TabSection =
+  | "vitals"
+  | "current"
+  | "meds"
+  | "admission"
+  | "imaging"
+  | "profile";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState<"bp" | "temp" | "pulse">("bp");
   const [expandedMed, setExpandedMed] = useState<number | null>(null);
   const [expandedExp, setExpandedExp] = useState<number | null>(null);
+  const [expandedRx, setExpandedRx] = useState<number | null>(null);
   const [section, setSection] = useState<TabSection>("vitals");
   const [ctExpanded, setCtExpanded] = useState(false);
 
@@ -340,9 +465,15 @@ export default function Page() {
     .reduce((s, i) => s + i.amount, 0);
   const grandTotal = dischargeMedTotal + admissionTotal;
 
+  const newCount = currentPrescription.filter((m) => m.status === "new").length;
+  const ongoingCourse = currentPrescription.filter(
+    (m) => m.courseStatus === "ongoing"
+  );
+
   const navItems: { id: TabSection; label: string }[] = [
     { id: "vitals", label: "Vitals" },
-    { id: "meds", label: "Medications" },
+    { id: "current", label: "Current Prescription" },
+    { id: "meds", label: "Discharge Meds" },
     { id: "admission", label: "Admission Costs" },
     { id: "imaging", label: "CT Scan Report" },
     { id: "profile", label: "Patient Profile" },
@@ -391,7 +522,8 @@ export default function Page() {
           <p className="text-xs text-amber-800">
             <span className="font-semibold">Diagnosis: Pontine infarct</span> ·
             Stroke onset Jun 2, 2026 · Right-side paralysis + aphasia ·
-            Physiotherapy ongoing · Check BP daily
+            Physiotherapy ongoing · Check BP daily · Neurology review Fri Jul
+            3, 2026 added {newCount} new medications
           </p>
         </div>
 
@@ -633,6 +765,142 @@ export default function Page() {
                 </table>
               </div>
             </section>
+          </>
+        )}
+
+        {/* ─── CURRENT PRESCRIPTION SECTION ─── */}
+        {section === "current" && (
+          <>
+            <div className="p-4 border border-blue-200 bg-blue-50 rounded-2xl">
+              <div className="flex items-start gap-3">
+                <Stethoscope className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-bold text-blue-900">
+                    Neurology review — Friday, Jul 3, 2026
+                  </p>
+                  <p className="mt-1 text-xs text-blue-800">
+                    {newCount} new medication{newCount !== 1 ? "s" : ""} added,
+                    one dose adjusted. Two short antibiotic courses were
+                    started —{" "}
+                    {ongoingCourse.length > 0
+                      ? `${ongoingCourse.map((m) => m.name.split(" ")[0]).join(", ")} still ongoing.`
+                      : "both now completed."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {currentPrescription.map((m, i) => {
+                const st = statusStyles[m.status];
+                return (
+                  <div
+                    key={i}
+                    className={`bg-white border rounded-2xl overflow-hidden ${expandedRx === i ? "border-slate-300" : "border-slate-100"}`}
+                  >
+                    <button
+                      className="w-full flex items-center justify-between px-4 py-3.5 text-left gap-3"
+                      onClick={() =>
+                        setExpandedRx(expandedRx === i ? null : i)
+                      }
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`flex items-center justify-center w-8 h-8 border rounded-xl shrink-0 ${m.status === "unclear" ? "bg-red-50 border-red-100" : "bg-slate-50 border-slate-100"}`}
+                        >
+                          {m.status === "unclear" ? (
+                            <ShieldQuestion className="w-4 h-4 text-red-500" />
+                          ) : (
+                            <Pill className="w-4 h-4 text-slate-500" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-800">
+                            {m.name}
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            {m.generic}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${st.classes}`}
+                        >
+                          {st.label}
+                        </span>
+                        {expandedRx === i ? (
+                          <ChevronUp className="w-4 h-4 text-slate-400" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-slate-400" />
+                        )}
+                      </div>
+                    </button>
+                    {expandedRx === i && (
+                      <div className="px-5 pt-1 pb-4 space-y-3 text-xs border-t border-slate-50">
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                          <div>
+                            <p className="text-slate-400 mb-0.5">Dose</p>
+                            <p className="font-semibold text-slate-700">
+                              {m.dose}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-slate-400 mb-0.5">Frequency</p>
+                            <p className="font-semibold text-slate-700">
+                              {m.frequency}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-slate-400 mb-0.5">Duration</p>
+                            <p className="font-semibold text-slate-700">
+                              {m.duration}
+                            </p>
+                          </div>
+                        </div>
+                        {m.startDate && (
+                          <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
+                            <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <p className="text-slate-600">
+                              {m.startDate} → {m.endDate}
+                              {m.courseStatus === "completed" && (
+                                <span className="ml-2 font-medium text-green-600">
+                                  Course completed
+                                </span>
+                              )}
+                              {m.courseStatus === "ongoing" && (
+                                <span className="ml-2 font-medium text-orange-600">
+                                  Course ongoing
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-slate-400 mb-0.5">
+                            What it's for
+                          </p>
+                          <p className="leading-relaxed text-slate-700">
+                            {m.purpose}
+                          </p>
+                        </div>
+                        {m.note && (
+                          <div className="p-2 border border-amber-100 bg-amber-50 rounded-lg">
+                            <p className="text-amber-800">{m.note}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="px-1 text-xs text-slate-400">
+              This list is built from your notes, not the original
+              prescription pad — please double-check doses against the
+              doctor's script, especially for "Grimesyts" above.
+            </p>
           </>
         )}
 
@@ -1144,6 +1412,12 @@ export default function Page() {
                     label: "Physiotherapy session",
                     note: "First post-discharge physio visit",
                     color: "bg-green-400",
+                  },
+                  {
+                    date: "Jul 3",
+                    label: "Neurology review",
+                    note: "New medications and antibiotic courses prescribed",
+                    color: "bg-blue-500",
                   },
                 ].map((t, i) => (
                   <div key={i} className="flex items-start gap-3">
