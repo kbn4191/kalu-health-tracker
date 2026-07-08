@@ -53,8 +53,9 @@ const vitals = [
   { day: "Wed 1", date: "Jul 1", temp: 36.2, sys: 128, dia: 66, pulse: 68 },
   { day: "Thu 2", date: "Jul 2", temp: 35.9, sys: 127, dia: 78, pulse: 67 },
   { day: "Fri 3", date: "Jul 3", temp: 36.1, sys: 134, dia: 74, pulse: 71 },
-  { day: "Wed 6", date: "Jul 6", temp: 36.1, sys: 125, dia: 72, pulse: 95 },
-  { day: "Thu 7", date: "Jul 7", temp: 36.5, sys: 120, dia: 65, pulse: 81 },
+  { day: "Mon 6", date: "Jul 6", temp: 36.1, sys: 125, dia: 72, pulse: 95 },
+  { day: "Tue 7", date: "Jul 7", temp: 36.5, sys: 120, dia: 65, pulse: 81 },
+    { day: "Wed 8", date: "Jul 8", temp: 36.5, sys: 134, dia: 72, pulse: 78 },
 ];
 
 // Prescription written by the neurologist at the Friday Jul 3, 2026 hospital visit.
