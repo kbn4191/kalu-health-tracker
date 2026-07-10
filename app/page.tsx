@@ -55,7 +55,9 @@ const vitals = [
   { day: "Fri 3", date: "Jul 3", temp: 36.1, sys: 134, dia: 74, pulse: 71 },
   { day: "Mon 6", date: "Jul 6", temp: 36.1, sys: 125, dia: 72, pulse: 95 },
   { day: "Tue 7", date: "Jul 7", temp: 36.5, sys: 120, dia: 65, pulse: 81 },
-    { day: "Wed 8", date: "Jul 8", temp: 35.5, sys: 134, dia: 72, pulse: 78 },
+  { day: "Wed 8", date: "Jul 8", temp: 35.5, sys: 134, dia: 72, pulse: 78 },
+  { day: "Thu 9", date: "Jul 9", temp: 35.5, sys: 128, dia: 71, pulse: 87 },
+  { day: "Fri 10", date: "Jul 10", temp: 36.5, sys: 159, dia: 91, pulse: 78 },
 ];
 
 // Prescription written by the neurologist at the Friday Jul 3, 2026 hospital visit.
@@ -68,8 +70,7 @@ const currentPrescription = [
     dose: "1 tablet",
     frequency: "Once daily — at night",
     duration: "Ongoing",
-    purpose:
-      "Lowers cholesterol and helps reduce the risk of another stroke",
+    purpose: "Lowers cholesterol and helps reduce the risk of another stroke",
     status: "continued",
   },
   {
@@ -469,7 +470,7 @@ export default function Page() {
 
   const newCount = currentPrescription.filter((m) => m.status === "new").length;
   const ongoingCourse = currentPrescription.filter(
-    (m) => m.courseStatus === "ongoing"
+    (m) => m.courseStatus === "ongoing",
   );
 
   const navItems: { id: TabSection; label: string }[] = [
@@ -524,8 +525,8 @@ export default function Page() {
           <p className="text-xs text-amber-800">
             <span className="font-semibold">Diagnosis: Pontine infarct</span> ·
             Stroke onset Jun 2, 2026 · Right-side paralysis + aphasia ·
-            Physiotherapy ongoing · Check BP daily · Neurology review Fri Jul
-            3, 2026 added {newCount} new medications
+            Physiotherapy ongoing · Check BP daily · Neurology review Fri Jul 3,
+            2026 added {newCount} new medications
           </p>
         </div>
 
@@ -782,8 +783,8 @@ export default function Page() {
                   </p>
                   <p className="mt-1 text-xs text-blue-800">
                     {newCount} new medication{newCount !== 1 ? "s" : ""} added,
-                    one dose adjusted. Two short antibiotic courses were
-                    started —{" "}
+                    one dose adjusted. Two short antibiotic courses were started
+                    —{" "}
                     {ongoingCourse.length > 0
                       ? `${ongoingCourse.map((m) => m.name.split(" ")[0]).join(", ")} still ongoing.`
                       : "both now completed."}
@@ -802,9 +803,7 @@ export default function Page() {
                   >
                     <button
                       className="w-full flex items-center justify-between px-4 py-3.5 text-left gap-3"
-                      onClick={() =>
-                        setExpandedRx(expandedRx === i ? null : i)
-                      }
+                      onClick={() => setExpandedRx(expandedRx === i ? null : i)}
                     >
                       <div className="flex items-center gap-3">
                         <div
@@ -820,9 +819,7 @@ export default function Page() {
                           <p className="text-sm font-semibold text-slate-800">
                             {m.name}
                           </p>
-                          <p className="text-xs text-slate-400">
-                            {m.generic}
-                          </p>
+                          <p className="text-xs text-slate-400">{m.generic}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -879,9 +876,7 @@ export default function Page() {
                           </div>
                         )}
                         <div>
-                          <p className="text-slate-400 mb-0.5">
-                            What it's for
-                          </p>
+                          <p className="text-slate-400 mb-0.5">What it's for</p>
                           <p className="leading-relaxed text-slate-700">
                             {m.purpose}
                           </p>
@@ -899,9 +894,9 @@ export default function Page() {
             </div>
 
             <p className="px-1 text-xs text-slate-400">
-              This list is built from your notes, not the original
-              prescription pad — please double-check doses against the
-              doctor's script, especially for "Grimesyts" above.
+              This list is built from your notes, not the original prescription
+              pad — please double-check doses against the doctor's script,
+              especially for "Grimesyts" above.
             </p>
           </>
         )}
