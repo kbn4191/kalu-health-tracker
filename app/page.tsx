@@ -85,7 +85,7 @@ const vitals = [
   {
     day: "Sun  12",
     date: "Jul Mor 12",
-    temp: 35.6,
+    temp: 36.5,
     sys: 145,
     dia: 82,
     pulse: 79,
