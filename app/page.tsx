@@ -90,13 +90,21 @@ const vitals = [
     dia: 82,
     pulse: 79,
   },
-   {
+  {
     day: "Sun  12",
     date: "Jul Eve 12",
     temp: 36.5,
     sys: 117,
     dia: 73,
     pulse: 86,
+  },
+  {
+    day: "Mon  13",
+    date: "Jul Mon 13",
+    temp: 35.9,
+    sys: 136,
+    dia: 81,
+    pulse: 71,
   },
 ];
 
