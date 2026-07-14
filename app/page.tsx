@@ -122,6 +122,14 @@ const vitals = [
     dia: 77,
     pulse: 73,
   },
+  {
+    day: "Tue  14",
+    date: "Jul Eve 14",
+    temp: 36.1,
+    sys: 110,
+    dia: 66,
+    pulse: 91,
+  },
 ];
 
 // Prescription written by the neurologist at the Friday Jul 3, 2026 hospital visit.
