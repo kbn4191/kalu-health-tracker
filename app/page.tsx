@@ -16,12 +16,9 @@ import {
   MapPin,
   Cross,
   Baby,
-  FlaskConical,
   Syringe,
   FileText,
   Stethoscope,
-  DollarSign,
-  Hospital,
   Scan,
   Dumbbell,
   Clock,
@@ -204,17 +201,17 @@ const vitals = [
   },
 ];
 
-// Prescription written by the neurologist at the Friday Jul 3, 2026 hospital visit.
+// Latest prescription (date not yet confirmed).
 // status: "new" = not seen before, "continued" = was already being taken,
-// "dose-changed" = same drug, dose/frequency updated, "unclear" = needs pharmacist confirmation.
+// "dose-changed" = same drug, dose/frequency updated, "unclear" = needs confirmation.
 const currentPrescription = [
   {
     name: "Atorvastatin 40mg",
     generic: "Atorvastatin",
     dose: "1 tablet",
     frequency: "Once daily — at night",
-    duration: "Ongoing",
-    purpose: "Lowers cholesterol and helps reduce the risk of another stroke",
+    duration: "1 month",
+    purpose: "Lowers cholesterol and reduces the risk of another stroke",
     status: "continued",
   },
   {
@@ -222,91 +219,84 @@ const currentPrescription = [
     generic: "Citicoline",
     dose: "1 tablet",
     frequency: "Once daily",
-    duration: "Ongoing",
+    duration: "1 month",
     purpose: "Supports brain cell recovery after the stroke",
     status: "continued",
-  },
-  {
-    name: "Vitamin C 500mg",
-    generic: "Ascorbic Acid",
-    dose: "1 tablet",
-    frequency: "Three times daily",
-    duration: "Ongoing",
-    purpose: "Antioxidant that supports the immune system",
-    status: "dose-changed",
-    note: "Frequency increased — was twice daily, now three times daily",
-  },
-  {
-    name: "Neurovite Forte",
-    generic: "B-Complex vitamins",
-    dose: "1 capsule",
-    frequency: "Once daily",
-    duration: "Ongoing",
-    purpose: "Nerve support / vitamin supplement",
-    status: "continued",
-  },
-  {
-    name: "Vitamin E 1000iu",
-    generic: "Tocopherol",
-    dose: "1 tablet",
-    frequency: "Once daily",
-    duration: "Ongoing",
-    purpose: "Antioxidant that supports nerve and blood vessel health",
-    status: "new",
   },
   {
     name: "Dabigatran 110mg",
     generic: "Dabigatran (Pradaxa)",
     dose: "1 tablet",
     frequency: "Once daily",
-    duration: "Ongoing",
+    duration: "1 month",
     purpose: "Prevents blood clots (anticoagulant)",
     status: "continued",
+    note: "Dabigatran is usually taken twice daily. Confirm this dose with the doctor or pharmacist. Kidney function (eGFR ~71) is also relevant for this drug.",
   },
   {
-    name: "Co-Diovan 40/10mg",
-    generic: "Valsartan / Amlodipine",
+    name: "Candesartan 8mg/40mg",
+    generic: "Candesartan (combination — confirm)",
     dose: "1 tablet",
     frequency: "Once daily",
-    duration: "Ongoing",
-    purpose: "Blood pressure control (combination therapy)",
-    status: "new",
-    note: "Confirm with the doctor whether this replaces Cardiotan (Telmisartan/Amlodipine) or is taken alongside it — both are BP combination drugs, so double-dosing should be avoided.",
+    duration: "1 month",
+    purpose: "Blood pressure control",
+    status: "unclear",
+    note: "Confirm the exact drug. Do not take together with Cardiotan or Co-Diovan — only one blood pressure combination should be used.",
   },
   {
-    name: "Cefixime 200mg",
-    generic: "Cefixime",
+    name: "Vitamin C 500mg",
+    generic: "Ascorbic Acid",
     dose: "1 tablet",
     frequency: "Twice daily (BD)",
-    duration: "5-day course",
-    startDate: "Jul 3, 2026",
-    endDate: "Jul 7, 2026",
-    purpose: "Antibiotic — treats a bacterial infection",
-    status: "new",
-    courseStatus: "ongoing",
+    duration: "1 month",
+    purpose: "Antioxidant that supports the immune system",
+    status: "dose-changed",
+    note: "Now twice daily (an earlier list said three times).",
+  },
+  {
+    name: "Vitamin E 1000iu",
+    generic: "Tocopherol",
+    dose: "1 capsule",
+    frequency: "Once daily",
+    duration: "1 month",
+    purpose: "Antioxidant that supports nerve and blood vessel health",
+    status: "continued",
   },
   {
     name: "Azithromycin 500mg",
     generic: "Azithromycin",
     dose: "1 tablet",
     frequency: "Once daily",
-    duration: "3-day course",
-    startDate: "Jul 3, 2026",
-    endDate: "Jul 5, 2026",
-    purpose: "Antibiotic — treats a bacterial/respiratory infection",
+    duration: "1 week",
+    purpose: "Antibiotic — bacterial/respiratory infection",
     status: "new",
-    courseStatus: "completed",
   },
   {
-    name: "Grimesyts",
-    generic: "Not identified",
-    dose: "—",
-    frequency: "—",
-    duration: "—",
-    purpose:
-      "This name doesn't match a drug we can identify from the note. Please confirm the exact name and dose with the pharmacist or prescribing doctor before giving it.",
-    status: "unclear",
+    name: "Co-amoxiclav 625mg",
+    generic: "Amoxicillin + Clavulanic acid",
+    dose: "1 tablet",
+    frequency: "3 times daily (TDS)",
+    duration: "1 week",
+    purpose: "Antibiotic — bacterial infection",
+    status: "new",
   },
+  {
+    name: "Bronchodyle Combi Syrup",
+    generic: "Bronchodilator / cough syrup",
+    dose: "1 teaspoon",
+    frequency: "Not written on the note",
+    duration: "1 month",
+    purpose: "Chest / cough relief",
+    status: "unclear",
+    note: "Ask how many times a day to give it.",
+  },
+];
+
+// On the previous list but NOT on the newest prescription
+const stoppedMeds = [
+  "Neurovite Forte (number was scribbled out on the Jul note)",
+  "Cefixime 200mg (1-week course)",
+  "Cardiotan / Co-Diovan (replaced by Candesartan? confirm)",
 ];
 
 const statusStyles: Record<string, { label: string; classes: string }> = {
@@ -552,6 +542,84 @@ const ctReport = {
     "Drs. Tuuma-Leele/Ogbuchi/Uhara/Ngwu/Udeagu (Consultant Radiologist)",
 };
 
+// f: "L" = low, "H" = high, "" = normal
+const labGroups = [
+  {
+    title: "Kidney & electrolytes (Jun 4)",
+    rows: [
+      { t: "Potassium", r: "3.45 mmol/L", ref: "3.5–5.0", f: "L" },
+      { t: "Sodium", r: "136.0 mmol/L", ref: "135–145", f: "" },
+      { t: "Chloride", r: "98.1 mmol/L", ref: "97–107", f: "" },
+      { t: "Bicarbonate", r: "24.3 mmol/L", ref: "20–31", f: "" },
+      { t: "Blood pH", r: "7.34", ref: "7.35–7.45", f: "L" },
+      { t: "Anion gap", r: "17.0 mmol/L", ref: "8–16", f: "H" },
+      { t: "Urea", r: "38.40 mg/dl", ref: "10–55", f: "" },
+      { t: "Creatinine", r: "1.1 mg/dl", ref: "0.7–1.20", f: "" },
+      { t: "eGFR", r: "70.88", ref: "≥90 normal (Stage 2 = 60–89)", f: "L" },
+    ],
+  },
+  {
+    title: "Cholesterol (Jun 4)",
+    rows: [
+      { t: "Total cholesterol", r: "211.44 mg/dl", ref: "<200", f: "H" },
+      { t: "Triglycerides", r: "34.24 mg/dl", ref: "<160", f: "" },
+      { t: "VLDL", r: "6.8 mg/dl", ref: "2–30", f: "" },
+      { t: "HDL", r: "67.03 mg/dl", ref: ">40", f: "" },
+      { t: "LDL (indirect)", r: "131.61 mg/dl", ref: "<130", f: "H" },
+      { t: "Non-HDL", r: "153.41 mg/dl", ref: "<130", f: "H" },
+    ],
+  },
+  {
+    title: "Full blood count (Jun 3)",
+    rows: [
+      { t: "Haemoglobin", r: "14.2 g/dL", ref: "13.0–18.0", f: "" },
+      { t: "Red cells", r: "4.76 ×10¹²/L", ref: "4.0–6.0", f: "" },
+      { t: "PCV", r: "42.8 %", ref: "40–54", f: "" },
+      { t: "White cells", r: "2.96 ×10⁹/L", ref: "4.0–11.0", f: "L" },
+      { t: "Neutrophils", r: "81.1 % (2.40)", ref: "2.0–7.5", f: "" },
+      { t: "Lymphocytes", r: "16.2 % (0.48)", ref: "1.0–4.0", f: "L" },
+      { t: "Platelets", r: "166 ×10⁹/L", ref: "150–450", f: "" },
+      { t: "ESR", r: "16 mm/hr", ref: "0–20", f: "" },
+    ],
+  },
+  {
+    title: "Urine (Jun 3)",
+    rows: [
+      { t: "Protein", r: "+", ref: "Negative", f: "H" },
+      { t: "Blood", r: "1 Plus", ref: "Negative", f: "H" },
+      { t: "Haemoglobin", r: "Positive", ref: "Negative", f: "H" },
+      { t: "Yeast", r: "Scanty (1–5/hpf)", ref: "Absent", f: "H" },
+      {
+        t: "Glucose / Ketones / Nitrite / Leucocytes",
+        r: "Negative",
+        ref: "Negative",
+        f: "",
+      },
+      {
+        t: "Specific gravity / pH",
+        r: "1.010 / 6.5",
+        ref: "1.005–1.030 / 4.0–9.0",
+        f: "",
+      },
+    ],
+  },
+];
+
+const otherReports = [
+  {
+    title: "ECG (Jun 4)",
+    body: "Sinus rhythm, rate ~69. Left ventricular hypertrophy with repolarization abnormality (inverted T waves in anterior and lateral leads). Other intervals normal.",
+  },
+  {
+    title: "Chest X-Ray (Jun 4)",
+    body: "Enlarged cardiac silhouette and aortic unfolding. Lungs clear. Suggests hypertensive heart disease. 2D echocardiogram recommended for further workup.",
+  },
+  {
+    title: "CT Brain — Medserve (Jun 6)",
+    body: "Large wedge-shaped acute infarct in the LEFT frontoparietal lobes (ACA and MCA territories) with mass effect on the frontal horn of the lateral ventricle. Also engorged rhinitis in the sinuses. Differs from the FMC report (pontine infarct) — ask the doctor to reconcile.",
+  },
+];
+
 function bpStatus(sys: number, dia: number) {
   if (sys < 90 || dia < 60)
     return { label: "Low", color: "text-blue-600 bg-blue-50" };
@@ -592,6 +660,7 @@ type TabSection =
   | "meds"
   | "admission"
   | "imaging"
+  | "labs"
   | "profile";
 
 export default function Page() {
@@ -613,9 +682,6 @@ export default function Page() {
   const grandTotal = dischargeMedTotal + admissionTotal;
 
   const newCount = currentPrescription.filter((m) => m.status === "new").length;
-  const ongoingCourse = currentPrescription.filter(
-    (m) => m.courseStatus === "ongoing",
-  );
 
   const navItems: { id: TabSection; label: string }[] = [
     { id: "vitals", label: "Vitals" },
@@ -623,6 +689,7 @@ export default function Page() {
     { id: "meds", label: "Discharge Meds" },
     { id: "admission", label: "Admission Costs" },
     { id: "imaging", label: "CT Scan Report" },
+    { id: "labs", label: "Test Results" },
     { id: "profile", label: "Patient Profile" },
   ];
 
@@ -643,7 +710,7 @@ export default function Page() {
                 Kalu Okeke Nwankwo
               </h1>
               <p className="text-xs text-slate-500">
-                74y · Male · Post-stroke care · Discharged Fri Jun 20, 2026
+                74y · Male · Post-stroke care · Discharged Sat Jun 20, 2026
               </p>
             </div>
           </div>
@@ -667,10 +734,11 @@ export default function Page() {
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 flex gap-3">
           <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
           <p className="text-xs text-amber-800">
-            <span className="font-semibold">Diagnosis: Pontine infarct</span> ·
-            Stroke onset Jun 2, 2026 · Right-side paralysis + aphasia ·
-            Physiotherapy ongoing · Check BP daily · Neurology review Fri Jul 3,
-            2026 added {newCount} new medications
+            <span className="font-semibold">Diagnosis: stroke</span> · Onset Jun
+            2, 2026 · Right-side paralysis + aphasia · Two CT reports differ
+            (pontine vs left MCA/ACA) — confirm with neurologist · Physiotherapy
+            ongoing · Check BP daily · Latest prescription has {newCount} new
+            medications
           </p>
         </div>
 
@@ -750,9 +818,7 @@ export default function Page() {
 
             <section className="p-5 bg-white border rounded-2xl border-slate-100">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-semibold text-slate-800">
-                  6-Day Trend
-                </h2>
+                <h2 className="text-sm font-semibold text-slate-800">Trend</h2>
                 <div className="flex gap-1">
                   {(["bp", "temp", "pulse"] as const).map((t) => (
                     <button
@@ -878,7 +944,7 @@ export default function Page() {
                       const isLatest = i === vitals.length - 1;
                       return (
                         <tr
-                          key={v.day}
+                          key={`${v.day}-${v.date}`}
                           className={`border-t border-slate-50 ${isLatest ? "bg-blue-50/40" : "hover:bg-slate-50"}`}
                         >
                           <td className="px-5 py-3 font-medium text-slate-700">
@@ -923,15 +989,12 @@ export default function Page() {
                 <Stethoscope className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm font-bold text-blue-900">
-                    Neurology review — Friday, Jul 3, 2026
+                    Latest prescription
                   </p>
                   <p className="mt-1 text-xs text-blue-800">
-                    {newCount} new medication{newCount !== 1 ? "s" : ""} added,
-                    one dose adjusted. Two short antibiotic courses were started
-                    —{" "}
-                    {ongoingCourse.length > 0
-                      ? `${ongoingCourse.map((m) => m.name.split(" ")[0]).join(", ")} still ongoing.`
-                      : "both now completed."}
+                    {newCount} new medication{newCount !== 1 ? "s" : ""} (two
+                    antibiotics). Some items need confirming with the doctor —
+                    see the flagged cards.
                   </p>
                 </div>
               </div>
@@ -1001,24 +1064,6 @@ export default function Page() {
                             </p>
                           </div>
                         </div>
-                        {m.startDate && (
-                          <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
-                            <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <p className="text-slate-600">
-                              {m.startDate} → {m.endDate}
-                              {m.courseStatus === "completed" && (
-                                <span className="ml-2 font-medium text-green-600">
-                                  Course completed
-                                </span>
-                              )}
-                              {m.courseStatus === "ongoing" && (
-                                <span className="ml-2 font-medium text-orange-600">
-                                  Course ongoing
-                                </span>
-                              )}
-                            </p>
-                          </div>
-                        )}
                         <div>
                           <p className="text-slate-400 mb-0.5">What it's for</p>
                           <p className="leading-relaxed text-slate-700">
@@ -1037,10 +1082,19 @@ export default function Page() {
               })}
             </div>
 
+            <div className="p-3 text-xs bg-white border border-slate-200 rounded-2xl text-slate-600">
+              <p className="mb-1 font-semibold text-slate-700">
+                On the previous list, not on this one
+              </p>
+              {stoppedMeds.map((s) => (
+                <p key={s}>• {s}</p>
+              ))}
+            </div>
+
             <p className="px-1 text-xs text-slate-400">
-              This list is built from your notes, not the original prescription
-              pad — please double-check doses against the doctor's script,
-              especially for "Grimesyts" above.
+              This list is built from photos of the handwritten note, not the
+              original prescription pad — please double-check doses against the
+              doctor's script.
             </p>
           </>
         )}
@@ -1124,7 +1178,6 @@ export default function Page() {
         {/* ─── ADMISSION COSTS SECTION ─── */}
         {section === "admission" && (
           <>
-            {/* Summary cards */}
             <div className="grid grid-cols-3 gap-3">
               <div className="p-4 text-center bg-white border rounded-2xl border-slate-100">
                 <p className="mb-1 text-xs text-slate-400">Discharge meds</p>
@@ -1159,7 +1212,7 @@ export default function Page() {
               return (
                 <div key={ci}>
                   <button
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl border ${cat.color} ${expandedExp === ci ? "" : ""}`}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl border ${cat.color}`}
                     onClick={() =>
                       setExpandedExp(expandedExp === ci ? null : ci)
                     }
@@ -1224,13 +1277,12 @@ export default function Page() {
         {/* ─── CT SCAN / IMAGING SECTION ─── */}
         {section === "imaging" && (
           <>
-            {/* Key conclusion card */}
             <div className="p-4 border border-red-200 bg-red-50 rounded-2xl">
               <div className="flex items-start gap-3">
                 <Scan className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
                 <div>
                   <p className="mb-1 text-sm font-bold text-red-800">
-                    CT Scan Conclusion
+                    CT Scan Conclusion (FMC, Jun 3)
                   </p>
                   {ctReport.conclusion.map((c, i) => (
                     <div key={i} className="flex items-center gap-2 mb-1">
@@ -1250,7 +1302,23 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Full report */}
+            <div className="p-4 border border-amber-200 bg-amber-50 rounded-2xl">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="mb-1 text-sm font-bold text-amber-900">
+                    Second CT (Medserve, Jun 6) reads differently
+                  </p>
+                  <p className="text-xs text-amber-800">
+                    Large wedge-shaped acute infarct in the left frontoparietal
+                    lobes (ACA and MCA territories) with mass effect on the
+                    frontal horn of the lateral ventricle. Ask the neurologist
+                    which is the working diagnosis.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="overflow-hidden bg-white border border-slate-100 rounded-2xl">
               <button
                 className="flex items-center justify-between w-full px-5 py-4"
@@ -1259,7 +1327,7 @@ export default function Page() {
                 <div className="flex items-center gap-3">
                   <FileText className="w-4 h-4 text-slate-500" />
                   <span className="text-sm font-semibold text-slate-800">
-                    Full Radiology Report
+                    Full Radiology Report (FMC)
                   </span>
                   <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
                     {ctReport.date}
@@ -1331,7 +1399,6 @@ export default function Page() {
               )}
             </div>
 
-            {/* Other scans */}
             <div className="p-4 space-y-3 bg-white border border-slate-100 rounded-2xl">
               <h3 className="text-sm font-semibold text-slate-800">
                 Other Imaging / Diagnostics
@@ -1381,6 +1448,58 @@ export default function Page() {
                 </div>
               ))}
             </div>
+          </>
+        )}
+
+        {/* ─── TEST RESULTS SECTION ─── */}
+        {section === "labs" && (
+          <>
+            {labGroups.map((g) => (
+              <div
+                key={g.title}
+                className="overflow-hidden bg-white border rounded-2xl border-slate-100"
+              >
+                <div className="px-5 py-3 border-b border-slate-50">
+                  <h2 className="text-sm font-semibold text-slate-800">
+                    {g.title}
+                  </h2>
+                </div>
+                {g.rows.map((r) => (
+                  <div
+                    key={r.t}
+                    className="flex items-center justify-between gap-3 px-5 py-2.5 text-xs border-t border-slate-50 first:border-0"
+                  >
+                    <div>
+                      <p className="font-medium text-slate-700">{r.t}</p>
+                      <p className="text-slate-400">Ref: {r.ref}</p>
+                    </div>
+                    <span
+                      className={`font-semibold px-2 py-0.5 rounded-full ${r.f === "L" ? "bg-blue-100 text-blue-700" : r.f === "H" ? "bg-red-100 text-red-700" : "text-slate-700"}`}
+                    >
+                      {r.r}
+                      {r.f ? ` (${r.f === "L" ? "Low" : "High"})` : ""}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ))}
+            {otherReports.map((o) => (
+              <div
+                key={o.title}
+                className="p-4 bg-white border rounded-2xl border-slate-100"
+              >
+                <p className="mb-1 text-sm font-semibold text-slate-800">
+                  {o.title}
+                </p>
+                <p className="text-xs leading-relaxed text-slate-600">
+                  {o.body}
+                </p>
+              </div>
+            ))}
+            <p className="px-1 text-xs text-slate-400">
+              Values were read from phone photos and may contain reading errors.
+              Verify against the original reports.
+            </p>
           </>
         )}
 
@@ -1454,7 +1573,6 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Medical history */}
             <div className="p-5 bg-white border rounded-2xl border-slate-100">
               <h2 className="mb-3 text-xs font-semibold tracking-widest uppercase text-slate-400">
                 Medical History Flags
@@ -1469,6 +1587,7 @@ export default function Page() {
                   { label: "Non-polygamous", ok: true },
                   { label: "Physiotherapy ongoing", ok: true },
                   { label: "Home BP monitoring", ok: true },
+                  { label: "Hypertensive heart disease (X-ray/ECG)", ok: null },
                 ].map((f) => (
                   <span
                     key={f.label}
@@ -1485,7 +1604,6 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Discovery story */}
             <div className="p-4 border bg-slate-50 border-slate-100 rounded-2xl">
               <h2 className="mb-2 text-xs font-semibold tracking-widest uppercase text-slate-400">
                 How It Was Discovered
@@ -1499,7 +1617,6 @@ export default function Page() {
               </p>
             </div>
 
-            {/* Care timeline */}
             <div className="p-5 bg-white border rounded-2xl border-slate-100">
               <h2 className="mb-4 text-xs font-semibold tracking-widest uppercase text-slate-400">
                 Care Timeline
@@ -1527,13 +1644,19 @@ export default function Page() {
                   {
                     date: "Jun 3",
                     label: "CT scan + lab tests",
-                    note: "Pontine infarct confirmed · ₦13,700 labs",
+                    note: "Pontine infarct reported · ₦13,700 labs",
                     color: "bg-purple-500",
+                  },
+                  {
+                    date: "Jun 4",
+                    label: "Chemistry, cholesterol, ECG, chest X-ray",
+                    note: "LV hypertrophy · enlarged heart · echo recommended",
+                    color: "bg-purple-400",
                   },
                   {
                     date: "Jun 6",
                     label: "Repeat CT Brain (Medserve)",
-                    note: "₦91,400 · Enhanced CT with 3D reconstruction",
+                    note: "₦91,400 · Left frontoparietal infarct reported (ACA/MCA)",
                     color: "bg-purple-400",
                   },
                   {
@@ -1559,6 +1682,12 @@ export default function Page() {
                     label: "Neurology review",
                     note: "New medications and antibiotic courses prescribed",
                     color: "bg-blue-500",
+                  },
+                  {
+                    date: "Latest",
+                    label: "New prescription",
+                    note: "Date to be confirmed · Candesartan, Co-amoxiclav, Bronchodyle",
+                    color: "bg-blue-400",
                   },
                 ].map((t, i) => (
                   <div key={i} className="flex items-start gap-3">
